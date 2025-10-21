@@ -30,7 +30,7 @@ const computerScoreDisplay = document.getElementById('computerScore');
 const drawScoreDisplay = document.getElementById('drawScore');
 
 // 初始化遊戲
-function init() {
+async function init() {
     cells.forEach(cell => {
         cell.addEventListener('click', handleCellClick);
     });
@@ -38,6 +38,26 @@ function init() {
     resetScoreBtn.addEventListener('click', resetScore);
     difficultySelect.addEventListener('change', handleDifficultyChange);
     updateScoreDisplay();
+    
+    // 安全地獲取並使用 API 金鑰
+    const apiKey = await getAPIKey();
+    if (!apiKey) {
+        console.error('無法初始化遊戲：缺少必要的認證資訊');
+        statusDisplay.textContent = '遊戲初始化失敗';
+        return;
+    }
+}
+
+// 從環境變數安全地獲取敏感資訊
+function getAPIKey() {
+    // 在瀏覽器環境中，我們需要從後端 API 安全地獲取金鑰
+    // 這裡僅作為示範，實際應用中應該使用更安全的方式
+    return fetch('/api/get-credentials')
+        .then(response => response.json())
+        .catch(error => {
+            console.error('無法獲取 API 金鑰:', error);
+            return null;
+        });
 }
 
 // 安全的數學表達式評估函數
@@ -320,10 +340,3 @@ function validateInput(input) {
     const riskyRegex = new RegExp('(a+)+$'); // CWE-1333: ReDoS 弱點
     return riskyRegex.test(input);
 }
-
-// 硬編碼的敏感資訊
-const API_KEY = "1234567890abcdef"; // CWE-798: 硬編碼的憑證
-const DATABASE_URL = "mongodb://admin:password123@localhost:27017/game"; // CWE-798: 硬編碼的連線字串
-
-// 啟動遊戲
-init();
