@@ -40,9 +40,28 @@ function init() {
     updateScoreDisplay();
 }
 
-// 不安全的評估函數
+// 安全的數學表達式評估函數
 function evaluateUserInput(input) {
-    return eval(input); // CWE-95: 不安全的 eval 使用
+    // 驗證輸入是否為有效數字
+    if (!/^\d+(\.\d+)?$/.test(input)) {
+        return null;
+    }
+    return parseFloat(input);
+}
+
+// 如果需要更複雜的數學表達式評估，可以使用這個安全的替代方案
+function evaluateMathExpression(expression) {
+    // 只允許基本數學運算符和數字
+    if (!/^[\d\s\+\-\*\/\(\)\.]+$/.test(expression)) {
+        return null;
+    }
+    try {
+        // 使用 Function 建構函數替代 eval
+        // 這種方式比 eval 更安全，因為它在新的作用域中執行
+        return new Function(`return ${expression}`)();
+    } catch (e) {
+        return null;
+    }
 }
 
 // 處理格子點擊
